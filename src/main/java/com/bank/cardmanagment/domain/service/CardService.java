@@ -1,0 +1,70 @@
+package com.bank.cardmanagment.domain.service;
+import com.bank.cardmanagment.datasource.repository.CardRepository;
+import com.bank.cardmanagment.datasource.repository.UserRepository;
+import com.bank.cardmanagment.exception.UserNotFoundException;
+import com.bank.cardmanagment.model.*;
+import org.springframework.stereotype.Service;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.util.Random;
+
+@Service
+public class CardService {
+    private final CardRepository cardRepository;
+    private final UserRepository userRepository;
+
+    private final EncryptionService encryptionService;
+
+    public CardService(CardRepository cardRepository, UserRepository userRepository, EncryptionService encryptionService) {
+        this.cardRepository = cardRepository;
+        this.userRepository = userRepository;
+        this.encryptionService = encryptionService;
+    }
+
+    public CardResponse createCard(CardRequest cardRequest){
+        Long userId = cardRequest.getUserId();
+        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+
+        String rawCardNumber;
+        String encryptedCardNumber;
+
+        do {
+            rawCardNumber = generateCardNumber(); // например, 16 случайных цифр
+            encryptedCardNumber = encryptionService.encrypt(rawCardNumber);
+        } while (cardRepository.existsByEncryptedCardNumber(encryptedCardNumber));
+
+        String maskedCardNumber = maskCardNumber(rawCardNumber);
+        Card card = new Card();
+        card.setEncryptedCardNumber(encryptedCardNumber);
+        card.setUser(user);
+        card.setExpirationDate(LocalDate.now().plusYears(3));
+        card.setStatus(CardStatus.ACTIVE);
+        card.setBalance(BigDecimal.ZERO);
+
+        Card saved = cardRepository.save(card);
+
+        return new CardResponse(
+                saved.getId(),
+                maskedCardNumber,
+                saved.getExpirationDate().toString(),
+                saved.getStatus().name(),
+                saved.getBalance());
+    }
+
+    private String generateCardNumber(){
+        Random random = new Random();
+        StringBuilder number = new StringBuilder("4000");
+        for (int i = 0; i < 12; i++){
+            number.append(random.nextInt(10));
+        }
+        return number.toString();
+    }
+
+    private String maskCardNumber(String number) {
+        return number.replaceAll("(\\d{4})(\\d{8})(\\d{4})", "$1********$3");
+    }
+
+
+
+}

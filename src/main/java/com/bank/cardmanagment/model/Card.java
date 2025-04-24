@@ -36,4 +36,40 @@ public class Card {
 
     public Card() {
     }
+
+    public void setEncryptedCardNumber(String encryptedCardNumber) {
+        this.encryptedCardNumber = encryptedCardNumber;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public void setExpirationDate(LocalDate expirationDate) {
+        this.expirationDate = expirationDate;
+    }
+
+    public void setStatus(CardStatus status) {
+        this.status = status;
+    }
+
+    public void setBalance(BigDecimal balance) {
+        this.balance = balance;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public LocalDate getExpirationDate() {
+        return expirationDate;
+    }
+
+    public CardStatus getStatus() {
+        return status;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
 }

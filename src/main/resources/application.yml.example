@@ -6,6 +6,11 @@ jwt:
   access-token-expiration: 600000      # 10 минут
   refresh-token-expiration: 604800000  # 7 дней (в мс)
 
+app:
+  encryption:
+    secret-key: my_encryption_secret
+
+
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/my_db
