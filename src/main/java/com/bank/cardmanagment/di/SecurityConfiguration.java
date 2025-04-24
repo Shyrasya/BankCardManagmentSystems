@@ -1,5 +1,10 @@
 package com.bank.cardmanagment.di;
 
+import com.bank.cardmanagment.datasource.repository.UserRepository;
+import com.bank.cardmanagment.domain.service.UserService;
+import com.bank.cardmanagment.security.JwtProvider;
+import com.bank.cardmanagment.security.JwtUtil;
+import com.bank.cardmanagment.web.filter.AuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -14,22 +19,22 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfiguration {
 
     @Bean
-    public UserServiceImpl userService(UserRepository userRepository, JwtProwider provider, JwtUtil util){
-        return new UserServiceImpl(userRepository, provider, util);
+    public UserService userService(UserRepository userRepository, JwtProvider provider, JwtUtil util) {
+        return new UserService(userRepository, provider, util);
     }
 
     @Bean
-    public JwtProvider provider(){
+    public JwtProvider provider() {
         return new JwtProvider();
     }
 
     @Bean
-    public JwtUtil util(){
+    public JwtUtil util() {
         return new JwtUtil();
     }
 
     @Bean
-    public AuthFilter authFilter(UserService userService){
+    public AuthFilter authFilter(UserService userService) {
         return new AuthFilter(userService);
     }
 

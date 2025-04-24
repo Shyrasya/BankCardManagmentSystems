@@ -14,14 +14,14 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column (nullable = false, unique = true)
+    @Column(nullable = false, unique = true)
     private String encryptedCardNumber;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
 
-    @Column (nullable = false)
+    @Column(nullable = false)
     private LocalDate expirationDate;
 
     @Enumerated(EnumType.STRING)
@@ -34,5 +34,6 @@ public class Card {
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions;
 
-    public Card(){}
+    public Card() {
+    }
 }

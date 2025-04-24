@@ -13,8 +13,6 @@ public interface UserRepository extends CrudRepository<User, Long> {
 
     Optional<User> findByLogin(String login);
 
-    Optional<User> findById(Long id);
-
     @Modifying
     @Query("UPDATE User u SET u.refreshToken = :refreshToken WHERE u.id = :id")
     void updateRefreshTokenByUuid(@Param("id") Long id, @Param("refreshToken") String refreshToken);

@@ -27,7 +27,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Card> cards;
 
-    public User(){}
+    public User() {
+    }
 
     public String getPassword() {
         return password;

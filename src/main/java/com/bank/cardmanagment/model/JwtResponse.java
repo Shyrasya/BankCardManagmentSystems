@@ -10,7 +10,8 @@ public class JwtResponse {
 
     private long expiresIn;
 
-    public JwtResponse(){}
+    public JwtResponse() {
+    }
 
 
     public JwtResponse(String accessToken, String refreshToken, long expiresIn) {
