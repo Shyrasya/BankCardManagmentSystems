@@ -39,3 +39,4 @@ build/
 .DS_Store
 
 application.yml
+004-insert-initial-users.yaml

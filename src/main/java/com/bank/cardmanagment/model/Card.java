@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -14,25 +15,25 @@ public class Card {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false, unique = true)
+    @Column(name = "encrypted_card_number", nullable = false, unique = true, length = 255)
     private String encryptedCardNumber;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    @Column(nullable = false)
+    @Column(name = "expiration_date", nullable = false)
     private LocalDate expirationDate;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private CardStatus status;
 
-    @Column(nullable = false)
+    @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transaction> transactions;
+    private List<Transaction> transactions = new ArrayList<>();;
 
     public Card() {
     }

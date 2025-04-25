@@ -1,7 +1,10 @@
 package com.bank.cardmanagment.model;
 
+import jakarta.validation.constraints.NotNull;
+
 public class CardRequest {
 
+    @NotNull(message = "ID пользователя обязателен")
     private Long userId;
 
 

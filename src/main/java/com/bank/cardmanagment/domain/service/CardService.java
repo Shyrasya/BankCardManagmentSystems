@@ -1,6 +1,7 @@
 package com.bank.cardmanagment.domain.service;
 import com.bank.cardmanagment.datasource.repository.CardRepository;
 import com.bank.cardmanagment.datasource.repository.UserRepository;
+import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
 import com.bank.cardmanagment.model.*;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class CardService {
         String encryptedCardNumber;
 
         do {
-            rawCardNumber = generateCardNumber(); // например, 16 случайных цифр
+            rawCardNumber = generateCardNumber();
             encryptedCardNumber = encryptionService.encrypt(rawCardNumber);
         } while (cardRepository.existsByEncryptedCardNumber(encryptedCardNumber));
 
@@ -63,6 +64,27 @@ public class CardService {
 
     private String maskCardNumber(String number) {
         return number.replaceAll("(\\d{4})(\\d{8})(\\d{4})", "$1********$3");
+    }
+
+    public void deleteCard(Long cardId){
+       if (!cardRepository.existsById(cardId)){
+           throw new CardNotFoundException("Карта с ID " + cardId + " не найдена!");
+       }
+       cardRepository.deleteById(cardId);
+    }
+
+    public void blockCard(Long cardId){
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
+        card.setStatus(CardStatus.BLOCKED);
+        cardRepository.save(card);
+    }
+
+    public void activateCard(Long cardId){
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
+        card.setStatus(CardStatus.ACTIVE);
+        cardRepository.save(card);
     }
 
 

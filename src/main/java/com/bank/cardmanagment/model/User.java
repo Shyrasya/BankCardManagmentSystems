@@ -2,6 +2,7 @@ package com.bank.cardmanagment.model;
 
 import jakarta.persistence.*;
 
+import java.util.HashSet;
 import java.util.Set;
 
 @Entity
@@ -19,13 +20,14 @@ public class User {
     private String password;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private Role role;
 
-    @Column
+    @Column(name = "refresh_token")
     private String refreshToken;
 
-    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-    private Set<Card> cards;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private Set<Card> cards = new HashSet<>();
 
     public User() {
     }

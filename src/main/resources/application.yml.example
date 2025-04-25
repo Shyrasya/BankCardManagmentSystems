@@ -10,7 +10,6 @@ app:
   encryption:
     secret-key: my_encryption_secret
 
-
 spring:
   datasource:
     url: jdbc:postgresql://localhost:5432/my_db
@@ -20,7 +19,7 @@ spring:
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     show-sql: true
 
   liquibase:

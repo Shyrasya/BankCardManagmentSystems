@@ -1,5 +1,6 @@
 package com.bank.cardmanagment.web.exception;
 
+import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -31,6 +32,13 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(UserNotFoundException.class)
     public ResponseEntity<?> handleUserNotFound(UserNotFoundException e) {
+        return ResponseEntity
+                .status(HttpStatus.NOT_FOUND)
+                .body(Map.of("error", e.getMessage()));
+    }
+
+    @ExceptionHandler(CardNotFoundException.class)
+    public ResponseEntity<?> handleCardNotFound(CardNotFoundException e){
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(Map.of("error", e.getMessage()));
