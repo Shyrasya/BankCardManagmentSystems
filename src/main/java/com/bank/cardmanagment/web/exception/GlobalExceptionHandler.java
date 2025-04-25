@@ -4,8 +4,10 @@ import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.server.ResponseStatusException;
@@ -15,6 +17,17 @@ import java.util.Optional;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<?> handleValidationErrors(MethodArgumentNotValidException ex) {
+        return ResponseEntity.badRequest().body("Невалидный JSON: " + ex.getMessage());
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<?> handleMissingBody(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest().body("Отсутствует тело запроса или JSON некорректный!");
+    }
 
     @ExceptionHandler(ResponseStatusException.class)
     public ResponseEntity<?> handleResponseStatusException(ResponseStatusException e) {

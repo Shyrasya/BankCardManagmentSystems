@@ -41,9 +41,9 @@ public class UserService {
 
     @Transactional
     public JwtResponse authorization(JwtRequest request) {
-        String inputLogin = request.getLogin();
+        String inputEmail = request.getEmail();
         String inputPassword = request.getPassword();
-        User user = userRepository.findByLogin(inputLogin).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
+        User user = userRepository.findByEmail(inputEmail).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
         if (!passwordEncoder.matches(inputPassword, user.getPassword())) {
             throw new BadCredentialsException("Неверный пароль!");

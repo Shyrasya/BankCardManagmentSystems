@@ -12,6 +12,9 @@ public class CardRequest {
         this.userId = userId;
     }
 
+    public CardRequest() {}
+
+
     public Long getUserId() {
         return userId;
     }

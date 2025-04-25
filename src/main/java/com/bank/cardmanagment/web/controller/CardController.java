@@ -20,7 +20,7 @@ public class CardController {
 
     @PostMapping("/create")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CardResponse> createCard(@RequestBody @Valid CardRequest cardRequest) {
+    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody(required = true) CardRequest cardRequest) {
         CardResponse response = cardService.createCard(cardRequest);
         return ResponseEntity.ok(response);
     }

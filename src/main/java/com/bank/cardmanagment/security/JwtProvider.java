@@ -17,10 +17,12 @@ public class JwtProvider {
     @Value("${jwt.refresh-token-expiration}")
     private long refreshTokenExpiration;
 
+    @Value("${jwt.secret}")
+    private String secret;
     private SecretKey secretKey;
 
     @PostConstruct
-    public void init(@Value("${jwt.secret}") String secret) {
+    public void init() {
         this.secretKey = Keys.hmacShaKeyFor(secret.getBytes());
     }
 

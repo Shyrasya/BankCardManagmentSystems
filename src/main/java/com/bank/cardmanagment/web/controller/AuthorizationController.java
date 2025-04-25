@@ -3,7 +3,9 @@ package com.bank.cardmanagment.web.controller;
 import com.bank.cardmanagment.domain.service.UserService;
 import com.bank.cardmanagment.model.JwtRequest;
 import com.bank.cardmanagment.model.JwtResponse;
+import com.bank.cardmanagment.model.TokenRequest;
 import com.bank.cardmanagment.model.TokenType;
+import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -22,20 +24,20 @@ public class AuthorizationController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody JwtRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody JwtRequest request) {
         JwtResponse response = userService.authorization(request);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/update-access")
-    public ResponseEntity<?> updateAccessToken(@RequestBody String refreshToken) {
-        JwtResponse response = userService.updateToken(refreshToken, TokenType.ACCESS);
+    public ResponseEntity<?> updateAccessToken(@Valid @RequestBody TokenRequest request) {
+        JwtResponse response = userService.updateToken(request.getRefreshToken(), TokenType.ACCESS);
         return ResponseEntity.ok(response);
     }
 
     @PostMapping("/update-refresh")
-    public ResponseEntity<?> updateRefreshToken(@RequestBody String refreshToken) {
-        JwtResponse response = userService.updateToken(refreshToken, TokenType.REFRESH);
+    public ResponseEntity<?> updateRefreshToken(@Valid @RequestBody TokenRequest request) {
+        JwtResponse response = userService.updateToken(request.getRefreshToken(), TokenType.REFRESH);
         return ResponseEntity.ok(response);
     }
 

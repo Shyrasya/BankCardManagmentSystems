@@ -17,4 +17,24 @@ public class CardResponse {
         this.status = status;
         this.balance = balance;
     }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getMaskedCardNumber() {
+        return maskedCardNumber;
+    }
+
+    public String getExpirationDate() {
+        return expirationDate;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public BigDecimal getBalance() {
+        return balance;
+    }
 }

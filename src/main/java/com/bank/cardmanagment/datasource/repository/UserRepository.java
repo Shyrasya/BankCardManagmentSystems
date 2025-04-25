@@ -9,9 +9,9 @@ import org.springframework.data.repository.query.Param;
 import java.util.Optional;
 
 public interface UserRepository extends CrudRepository<User, Long> {
-    boolean existsByLogin(String login);
+    boolean existsByEmail(String email);
 
-    Optional<User> findByLogin(String login);
+    Optional<User> findByEmail(String email);
 
     @Modifying
     @Query("UPDATE User u SET u.refreshToken = :refreshToken WHERE u.id = :id")

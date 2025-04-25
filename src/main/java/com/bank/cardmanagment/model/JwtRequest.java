@@ -1,16 +1,22 @@
 package com.bank.cardmanagment.model;
 
+import jakarta.validation.constraints.NotBlank;
+
 public class JwtRequest {
-    private String login;
+
+    @NotBlank(message = "Email обязателен")
+    private String email;
+
+    @NotBlank(message = "Пароль обязателен")
     private String password;
 
 
-    public String getLogin() {
-        return login;
+    public String getEmail() {
+        return email;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
     public String getPassword() {
