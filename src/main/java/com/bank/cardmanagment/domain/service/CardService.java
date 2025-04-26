@@ -6,6 +6,8 @@ import com.bank.cardmanagment.exception.UserNotFoundException;
 import com.bank.cardmanagment.model.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -103,6 +105,16 @@ public class CardService {
                 .map(this::convertToCardResponse);
     }
 
+    public Page<CardResponse> getAllMyCards(CardStatus cardStatus, Pageable pageable){
+        Long userId = getCurrentUserId();
+        if (cardStatus != null){
+            return cardRepository.findByStatusAndUserId(cardStatus, userId, pageable)
+                    .map(this::convertToCardResponse);
+        }
+        return cardRepository.findByUserId(userId, pageable)
+                .map(this::convertToCardResponse);
+    }
+
     private CardResponse convertToCardResponse(Card card){
         return new CardResponse(
                 card.getId(),
@@ -110,6 +122,16 @@ public class CardService {
                 card.getExpirationDate().toString(),
                 card.getStatus().name(),
                 card.getBalance());
+    }
+
+    private Long getCurrentUserId(){
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof Long) {
+            return (Long) principal;
+        } else {
+            throw new IllegalStateException("Principal для UserId в JwtAuthentication не является типом Long!");
+        }
     }
 
 

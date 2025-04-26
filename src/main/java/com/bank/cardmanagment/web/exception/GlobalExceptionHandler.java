@@ -2,6 +2,8 @@ package com.bank.cardmanagment.web.exception;
 
 import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -9,14 +11,17 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.servlet.NoHandlerFoundException;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -27,12 +32,14 @@ public class GlobalExceptionHandler {
         e.getBindingResult().getFieldErrors().forEach(error ->
                 errors.put(error.getField(), error.getDefaultMessage())
         );
-        return ResponseEntity.badRequest().body(errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(errors);
     }
 
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleMissingBody(HttpMessageNotReadableException e) {
-        return ResponseEntity.badRequest().body(Map.of("error","Отсутствует тело запроса или JSON некорректный!"));
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error","Отсутствует тело запроса или JSON некорректный!"));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -76,17 +83,30 @@ public class GlobalExceptionHandler {
                 .body(Map.of("error","Неверный формат данных: " + e.getValue()));
     }
 
-    @ExceptionHandler(Exception.class)
-    public ResponseEntity<?> handleUnexpectedException(Exception e) {
-        return ResponseEntity
-                .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Внутренняя ошибка сервера!"));
-    }
-
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", e.getMessage()));
 
+    }
+
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<Map<String, String>> handleMissingPathVariable(MissingPathVariableException e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Обязательный параметр в пути не найден: " + e.getVariableName()));
+    }
+
+    @ExceptionHandler(NoHandlerFoundException.class)
+    public ResponseEntity<Map<String, String>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(Map.of("error", "Некорректный запрос: отсутствует обязательный параметр в пути!"));
+    }
+
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<?> handleUnexpectedException(Exception e) {
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(Map.of("error", "Внутренняя ошибка сервера!"));
     }
 }

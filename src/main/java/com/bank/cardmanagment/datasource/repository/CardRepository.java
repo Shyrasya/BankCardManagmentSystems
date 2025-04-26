@@ -15,4 +15,5 @@ public interface CardRepository extends JpaRepository<Card, Long> {
     Page<Card> findByStatus(CardStatus status, Pageable pageable);
 
     Page<Card> findByStatusAndUserId(CardStatus status, Long userId, Pageable pageable);
+
 }

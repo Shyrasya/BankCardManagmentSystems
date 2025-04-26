@@ -51,6 +51,4 @@ public class AuthorizationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при выходе: " + e.getMessage());
         }
     }
-
-//    @PreAuthorize("hasRole('ADMIN')") //USER, ADMIN
 }

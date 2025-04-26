@@ -1,10 +1,12 @@
 package com.bank.cardmanagment.model;
 
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class CardRequest {
 
-    @NotNull(message = "ID пользователя обязателен")
+    @NotNull(message = "ID пользователя обязателен!")
+    @Positive(message = "ID пользователя должен быть положительным числом!")
     private Long userId;
 
 

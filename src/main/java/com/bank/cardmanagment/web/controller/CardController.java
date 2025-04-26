@@ -5,12 +5,15 @@ import com.bank.cardmanagment.model.CardRequest;
 import com.bank.cardmanagment.model.CardResponse;
 import com.bank.cardmanagment.model.CardStatus;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Arrays;
@@ -27,40 +30,28 @@ public class CardController {
 
     @PostMapping("/create-card")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody(required = true) CardRequest cardRequest) {
-        if (cardRequest.getUserId() <= 0){
-            throw new IllegalArgumentException("ID пользователя не может быть отрицательным или нулевым!");
-        }
+    public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardRequest cardRequest) {
         CardResponse response = cardService.createCard(cardRequest);
         return ResponseEntity.ok(response);
     }
 
     @DeleteMapping("/delete-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> deleteCard(@PathVariable Long cardId){
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым!");
-        }
+    public ResponseEntity<?> deleteCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId){
         cardService.deleteCard(cardId);
         return ResponseEntity.ok("Карта с ID " + cardId + " была успешно удалена!");
     }
 
     @PatchMapping("/block-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> blockCard(@PathVariable Long cardId){
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым!");
-        }
+    public ResponseEntity<?> blockCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId){
         cardService.blockCard(cardId);
         return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
     }
 
     @PatchMapping("/activate-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
-    public ResponseEntity<?> activateCard(@PathVariable Long cardId){
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым!");
-        }
+    public ResponseEntity<?> activateCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId){
         cardService.activateCard(cardId);
         return ResponseEntity.ok("Карта с ID " + cardId + " активирована!");
     }
@@ -69,29 +60,42 @@ public class CardController {
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Page<CardResponse>> getAllCards(
             @RequestParam(value = "status", required = false) String status,
-            @RequestParam(value = "userId", required = false) Long userId,
-            @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size){
-        CardStatus cardStatus = null;
-        if (status != null) {
-            try {
-                cardStatus = CardStatus.valueOf(status.toUpperCase());
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Неверное значение статуса карт! Доступные значения: " + Arrays.toString(CardStatus.values()));
-            }
-        }
-        if (userId != null && userId <= 0) {
-            throw new IllegalArgumentException("ID пользователя не может быть отрицательным или нулевым!");
-        }
-        if (page <= 0) {
-            throw new IllegalArgumentException("Номер страницы должен быть больше нуля!");
-        }
-        if (size <= 0) {
-            throw new IllegalArgumentException("Размер страницы должен быть больше нуля!");
-        }
+            @RequestParam(value = "userId", required = false)
+            @Min(value = 1, message = "ID пользователя должен быть положительным числом!") Long userId,
+            @RequestParam(value = "page", defaultValue = "1")
+            @Min(value = 1, message = "Номер страницы должен быть больше нуля!") int page,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(value = 1, message = "Размер страницы должен быть больше нуля!") int size){
+        CardStatus cardStatus = parseStatus(status);
         int correctedPage = page - 1;
         Pageable pageable = PageRequest.of(correctedPage, size, Sort.by("id").ascending());
         Page<CardResponse> cardResponses = cardService.getAllCards(cardStatus, userId, pageable);
         return ResponseEntity.ok(cardResponses);
+    }
+
+    @GetMapping("/get-my-cards")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Page<CardResponse>> getAllMyCards(
+            @RequestParam(value = "status", required = false) String status,
+            @RequestParam(value = "page", defaultValue = "1")
+            @Min(value = 1, message = "Номер страницы должен быть больше нуля!") int page,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(value = 1, message = "Размер страницы должен быть больше нуля!") int size) {
+        CardStatus cardStatus = parseStatus(status);
+        int correctedPage = page - 1;
+        Pageable pageable = PageRequest.of(correctedPage, size, Sort.by("id").ascending());
+        Page<CardResponse> cardResponses = cardService.getAllMyCards(cardStatus, pageable);
+        return ResponseEntity.ok(cardResponses);
+    }
+
+    private CardStatus parseStatus(String status) {
+        if (!StringUtils.hasText(status)) {
+            return null;
+        }
+        try {
+            return CardStatus.valueOf(status.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Неверное значение статуса карт! Доступные значения: " + Arrays.toString(CardStatus.values()));
+        }
     }
 }
