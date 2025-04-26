@@ -66,14 +66,21 @@ public class CardService {
         return number.replaceAll("(\\d{4})(\\d{8})(\\d{4})", "$1********$3");
     }
 
-    public void deleteCard(Long cardId){
-       if (!cardRepository.existsById(cardId)){
-           throw new CardNotFoundException("Карта с ID " + cardId + " не найдена!");
-       }
-       cardRepository.deleteById(cardId);
+    public void deleteCard(Long cardId) {
+        if (cardId <= 0) {
+            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
+        }
+        if (!cardRepository.existsById(cardId)) {
+            throw new CardNotFoundException("Карта с ID " + cardId + " не найдена!");
+        }
+        cardRepository.deleteById(cardId);
     }
 
-    public void blockCard(Long cardId){
+
+    public void blockCard(Long cardId) {
+        if (cardId <= 0) {
+            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
+        }
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
         card.setStatus(CardStatus.BLOCKED);
@@ -81,6 +88,9 @@ public class CardService {
     }
 
     public void activateCard(Long cardId){
+        if (cardId <= 0) {
+            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
+        }
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
         card.setStatus(CardStatus.ACTIVE);

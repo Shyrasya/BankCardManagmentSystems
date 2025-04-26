@@ -18,31 +18,31 @@ public class CardController {
         this.cardService = cardService;
     }
 
-    @PostMapping("/create")
+    @PostMapping("/create-card")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<CardResponse> createCard(@Valid @RequestBody(required = true) CardRequest cardRequest) {
         CardResponse response = cardService.createCard(cardRequest);
         return ResponseEntity.ok(response);
     }
 
-    @DeleteMapping("/{cardId}")
+    @DeleteMapping("/delete-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<Void> deleteCard(@PathVariable Long cardId){
         cardService.deleteCard(cardId);
         return ResponseEntity.noContent().build();
     }
 
-    @PatchMapping("/{cardId}/block")
+    @PatchMapping("/block-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> blockCard(@PathVariable Long cardId){
         cardService.blockCard(cardId);
-        return ResponseEntity.ok("Карта заблокирована!");
+        return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
     }
 
-    @PatchMapping("/{cardId}/activate")
+    @PatchMapping("/activate-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<?> activateCard(@PathVariable Long cardId){
         cardService.activateCard(cardId);
-        return ResponseEntity.ok("Карта активирована!");
+        return ResponseEntity.ok("Карта с ID " + cardId + " активирована!");
     }
 }
