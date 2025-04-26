@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.Arrays;
 
 @RestController
-@RequestMapping("/card-managment/")
+@RequestMapping("/card-management/")
 public class CardController {
 
     private final CardService cardService;
@@ -77,7 +77,7 @@ public class CardController {
             try {
                 cardStatus = CardStatus.valueOf(status.toUpperCase());
             } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Неверное значение статуса! Доступные значения: " + Arrays.toString(CardStatus.values()));
+                throw new IllegalArgumentException("Неверное значение статуса карт! Доступные значения: " + Arrays.toString(CardStatus.values()));
             }
         }
         if (userId != null && userId <= 0) {

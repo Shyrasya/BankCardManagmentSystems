@@ -95,7 +95,7 @@ public class CardService {
         } else if (cardStatus != null){
             return cardRepository.findByStatus(cardStatus, pageable)
                     .map(this::convertToCardResponse);
-        } else if (userId != null && userId > 0){
+        } else if (userId != null){
             return cardRepository.findByUserId(userId, pageable)
                     .map(this::convertToCardResponse);
         }

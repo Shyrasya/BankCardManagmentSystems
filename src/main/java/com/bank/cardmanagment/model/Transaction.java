@@ -25,4 +25,20 @@ public class Transaction {
     @ManyToOne
     @JoinColumn(name = "card_id", nullable = false)
     private Card card;
+
+    public Long getId() {
+        return id;
+    }
+
+    public TransactionType getType() {
+        return type;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public LocalDateTime getTimestamp() {
+        return timestamp;
+    }
 }

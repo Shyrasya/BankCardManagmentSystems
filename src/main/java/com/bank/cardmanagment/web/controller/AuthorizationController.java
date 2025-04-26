@@ -15,7 +15,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 @Controller
-@RequestMapping("/card-managment/auth")
+@RequestMapping("/card-management/auth")
 public class AuthorizationController {
     private final UserService userService;
 

@@ -29,7 +29,7 @@ public class AuthFilter extends GenericFilterBean {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
 
-        if (path.equals("/card-managment/auth/login")) {
+        if (path.equals("/card-management/auth/login")) {
             chain.doFilter(request, response);
             return;
         }
