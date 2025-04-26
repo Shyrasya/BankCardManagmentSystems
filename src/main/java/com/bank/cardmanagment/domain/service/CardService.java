@@ -4,6 +4,8 @@ import com.bank.cardmanagment.datasource.repository.UserRepository;
 import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
 import com.bank.cardmanagment.model.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -29,7 +31,6 @@ public class CardService {
 
         String rawCardNumber;
         String encryptedCardNumber;
-
         do {
             rawCardNumber = generateCardNumber();
             encryptedCardNumber = encryptionService.encrypt(rawCardNumber);
@@ -42,7 +43,6 @@ public class CardService {
         card.setExpirationDate(LocalDate.now().plusYears(3));
         card.setStatus(CardStatus.ACTIVE);
         card.setBalance(BigDecimal.ZERO);
-
         Card saved = cardRepository.save(card);
 
         return new CardResponse(
@@ -67,9 +67,6 @@ public class CardService {
     }
 
     public void deleteCard(Long cardId) {
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
-        }
         if (!cardRepository.existsById(cardId)) {
             throw new CardNotFoundException("Карта с ID " + cardId + " не найдена!");
         }
@@ -78,9 +75,6 @@ public class CardService {
 
 
     public void blockCard(Long cardId) {
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
-        }
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
         card.setStatus(CardStatus.BLOCKED);
@@ -88,15 +82,35 @@ public class CardService {
     }
 
     public void activateCard(Long cardId){
-        if (cardId <= 0) {
-            throw new IllegalArgumentException("ID карты не может быть отрицательным или нулевым");
-        }
         Card card = cardRepository.findById(cardId)
                 .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
         card.setStatus(CardStatus.ACTIVE);
         cardRepository.save(card);
     }
 
+    public Page<CardResponse> getAllCards(CardStatus cardStatus, Long userId, Pageable pageable){
+        if (cardStatus != null && userId != null){
+            return cardRepository.findByStatusAndUserId(cardStatus, userId, pageable)
+                    .map(this::convertToCardResponse);
+        } else if (cardStatus != null){
+            return cardRepository.findByStatus(cardStatus, pageable)
+                    .map(this::convertToCardResponse);
+        } else if (userId != null && userId > 0){
+            return cardRepository.findByUserId(userId, pageable)
+                    .map(this::convertToCardResponse);
+        }
+        return cardRepository.findAll(pageable)
+                .map(this::convertToCardResponse);
+    }
+
+    private CardResponse convertToCardResponse(Card card){
+        return new CardResponse(
+                card.getId(),
+                maskCardNumber(encryptionService.decrypt(card.getEncryptedCardNumber())),
+                card.getExpirationDate().toString(),
+                card.getStatus().name(),
+                card.getBalance());
+    }
 
 
 }

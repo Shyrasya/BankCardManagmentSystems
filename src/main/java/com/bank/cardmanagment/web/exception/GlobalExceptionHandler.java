@@ -72,7 +72,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<?> handleTypeMismatchException(MethodArgumentTypeMismatchException e) {
-        return ResponseEntity.badRequest()
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error","Неверный формат данных: " + e.getValue()));
     }
 
@@ -87,5 +87,6 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleIllegalArgument(IllegalArgumentException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(Map.of("error", e.getMessage()));
+
     }
 }

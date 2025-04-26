@@ -73,4 +73,8 @@ public class Card {
     public BigDecimal getBalance() {
         return balance;
     }
+
+    public String getEncryptedCardNumber() {
+        return encryptedCardNumber;
+    }
 }
