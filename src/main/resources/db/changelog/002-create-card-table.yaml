@@ -36,9 +36,21 @@ databaseChangeLog:
                     nullable: false
               - column:
                   name: balance
-                  type: NUMERIC(19,2)
+                  type: DECIMAL(19,2)
                   constraints:
                     nullable: false
+              - column:
+                  name: daily_limit
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0.00
+              - column:
+                  name: monthly_limit
+                  type: DECIMAL(19,2)
+                  constraints:
+                    nullable: false
+                  defaultValueNumeric: 0.00
 
         - addForeignKeyConstraint:
             baseTableName: cards

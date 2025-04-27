@@ -2,6 +2,7 @@ package com.bank.cardmanagement.web.exception;
 
 import com.bank.cardmanagement.exception.CardNotFoundException;
 import com.bank.cardmanagement.exception.EmailAlreadyExistsException;
+import com.bank.cardmanagement.exception.ResourceNotFoundException;
 import com.bank.cardmanagement.exception.UserNotFoundException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -37,7 +38,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleMissingBody(HttpMessageNotReadableException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error","Отсутствует тело запроса или JSON некорректный! " + e.getMessage()));
+                .body(Map.of("error","Отсутствует тело запроса или JSON некорректный!"));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -103,6 +104,12 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(EmailAlreadyExistsException.class)
     public ResponseEntity<String> handleEmailAlreadyExistsException(EmailAlreadyExistsException e) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(e.getMessage());
+    }
+
+    @ExceptionHandler(ResourceNotFoundException.class)
+    public ResponseEntity<String> handleResourceNotFoundException(ResourceNotFoundException e) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(e.getMessage());
     }
 

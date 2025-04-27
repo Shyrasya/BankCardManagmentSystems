@@ -1,9 +1,11 @@
 package com.bank.cardmanagement.domain.service;
 import com.bank.cardmanagement.datasource.repository.CardRepository;
 import com.bank.cardmanagement.datasource.repository.UserRepository;
+import com.bank.cardmanagement.dto.request.CardLimitRequest;
 import com.bank.cardmanagement.dto.request.CardRequest;
 import com.bank.cardmanagement.dto.response.CardResponse;
 import com.bank.cardmanagement.exception.CardNotFoundException;
+import com.bank.cardmanagement.exception.ResourceNotFoundException;
 import com.bank.cardmanagement.exception.UserNotFoundException;
 import com.bank.cardmanagement.entity.*;
 import org.springframework.data.domain.Page;
@@ -50,6 +52,8 @@ public class CardService {
         card.setExpirationDate(LocalDate.now().plusYears(3));
         card.setStatus(CardStatus.ACTIVE);
         card.setBalance(BigDecimal.ZERO);
+        card.setDailyLimit(BigDecimal.ZERO);
+        card.setMonthlyLimit(BigDecimal.ZERO);
         Card saved = cardRepository.save(card);
 
         return new CardResponse(
@@ -154,4 +158,19 @@ public class CardService {
         cardRepository.save(card);
     }
 
+    @Transactional
+    public void setCardLimits(Long cardId, CardLimitRequest request){
+        Card card = cardRepository.findById(cardId)
+                .orElseThrow(() -> new ResourceNotFoundException("Карта с id " + cardId + " не найдена"));
+        if (request.getDailyLimit() == null && request.getMonthlyLimit() == null) {
+            throw new IllegalArgumentException("Не указано ни одного лимита!");
+        }
+        if (request.getDailyLimit() != null){
+            card.setDailyLimit(request.getDailyLimit());
+        }
+        if (request.getMonthlyLimit() != null){
+            card.setMonthlyLimit(request.getMonthlyLimit());
+        }
+        cardRepository.save(card);
+    }
 }

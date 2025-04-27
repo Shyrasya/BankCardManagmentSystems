@@ -1,6 +1,7 @@
 package com.bank.cardmanagement.web.controller;
 
 import com.bank.cardmanagement.domain.service.CardService;
+import com.bank.cardmanagement.dto.request.CardLimitRequest;
 import com.bank.cardmanagement.dto.request.CardRequest;
 import com.bank.cardmanagement.dto.response.CardResponse;
 import com.bank.cardmanagement.entity.CardStatus;
@@ -104,5 +105,13 @@ public class CardController {
     public ResponseEntity<String> blockMyCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId){
         cardService.blockMyCard(cardId);
         return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
+    }
+
+    @PatchMapping("/set-card-limits/{cardId}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public ResponseEntity<String> setCardLimits(@PathVariable Long cardId,
+                                                @Valid @RequestBody CardLimitRequest request){
+        cardService.setCardLimits(cardId, request);
+        return ResponseEntity.ok("Лимиты успешно установлены!");
     }
 }

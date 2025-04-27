@@ -29,8 +29,15 @@ public class Card {
     @Column(nullable = false, length = 20)
     private CardStatus status;
 
-    @Column(nullable = false, precision = 19, scale = 2)
+    @Column(precision = 19, scale = 2)
     private BigDecimal balance;
+
+    @Column(name = "daily_limit", precision = 19, scale = 2)
+    private BigDecimal dailyLimit;
+
+    @Column(name = "monthly_limit", precision = 19, scale = 2)
+    private BigDecimal monthlyLimit;
+
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
@@ -80,5 +87,21 @@ public class Card {
 
     public User getUser() {
         return user;
+    }
+
+    public BigDecimal getDailyLimit() {
+        return dailyLimit;
+    }
+
+    public void setDailyLimit(BigDecimal dailyLimit) {
+        this.dailyLimit = dailyLimit;
+    }
+
+    public BigDecimal getMonthlyLimit() {
+        return monthlyLimit;
+    }
+
+    public void setMonthlyLimit(BigDecimal monthlyLimit) {
+        this.monthlyLimit = monthlyLimit;
     }
 }
