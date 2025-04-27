@@ -77,4 +77,8 @@ public class Card {
     public String getEncryptedCardNumber() {
         return encryptedCardNumber;
     }
+
+    public User getUser() {
+        return user;
+    }
 }

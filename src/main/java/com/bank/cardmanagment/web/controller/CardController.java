@@ -98,4 +98,11 @@ public class CardController {
             throw new IllegalArgumentException("Неверное значение статуса карт! Доступные значения: " + Arrays.toString(CardStatus.values()));
         }
     }
+
+    @PatchMapping("/block-my-card/{cardId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> blockMyCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId){
+        cardService.blockMyCard(cardId);
+        return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
+    }
 }

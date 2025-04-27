@@ -9,6 +9,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.security.access.AccessDeniedException;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -134,5 +135,15 @@ public class CardService {
         }
     }
 
+    public void blockMyCard(Long cardId){
+        Long userId = getCurrentUserId();
+        Card card = cardRepository.findById(cardId)
+               .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
+        if (!card.getUser().getId().equals(userId)){
+            throw new AccessDeniedException("Нет доступа к данной карте!");
+        }
+        card.setStatus(CardStatus.BLOCKED);
+        cardRepository.save(card);
+    }
 
 }
