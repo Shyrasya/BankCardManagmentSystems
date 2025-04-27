@@ -33,7 +33,7 @@ public class Card {
     private BigDecimal balance;
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Transaction> transactions = new ArrayList<>();;
+    private List<Transaction> transactions = new ArrayList<>();
 
     public Card() {
     }

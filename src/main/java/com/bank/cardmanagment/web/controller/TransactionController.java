@@ -1,8 +1,6 @@
 package com.bank.cardmanagment.web.controller;
 
-
 import com.bank.cardmanagment.domain.service.TransactionService;
-import com.bank.cardmanagment.model.CardStatus;
 import com.bank.cardmanagment.model.TransactionResponse;
 import com.bank.cardmanagment.model.TransactionType;
 import jakarta.validation.constraints.Min;
@@ -40,11 +38,30 @@ public class TransactionController {
             @Min(value = 1, message = "Номер страницы должен быть больше нуля!") int page,
             @RequestParam(value = "size", defaultValue = "10")
             @Min(value = 1, message = "Размер страницы должен быть больше нуля!") int size){
+        return ResponseEntity.ok(getTransactions(type, cardId, page, size, true));
+    }
+
+    @GetMapping("/get-my-transactions")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<Page<TransactionResponse>> getAllMyTransaction(
+            @RequestParam(value = "type", required = false) String type,
+            @RequestParam(value = "cardId", required = false)
+            @Min(value = 1, message = "ID карты должен быть положительным числом!") Long cardId,
+            @RequestParam(value = "page", defaultValue = "1")
+            @Min(value = 1, message = "Номер страницы должен быть больше нуля!") int page,
+            @RequestParam(value = "size", defaultValue = "10")
+            @Min(value = 1, message = "Размер страницы должен быть больше нуля!") int size){
+        return ResponseEntity.ok(getTransactions(type, cardId, page, size, false));
+    }
+
+    private Page<TransactionResponse> getTransactions(String type, Long cardId, int page, int size, boolean isAdmin){
         TransactionType transactionType = parseType(type);
         int correctPage = page - 1;
         Pageable pageable = PageRequest.of(correctPage, size, Sort.by("id").ascending());
-        Page<TransactionResponse> transactionResponses = transactionService.getAllTransactions(transactionType, cardId, pageable);
-        return ResponseEntity.ok(transactionResponses);
+        if (isAdmin){
+            return transactionService.getAllTransactions(transactionType, cardId, pageable);
+        }
+        return transactionService.getAllMyTransactions(transactionType, cardId, pageable);
     }
 
     private TransactionType parseType(String type) {
@@ -57,10 +74,4 @@ public class TransactionController {
             throw new IllegalArgumentException("Неверное значение типа транзакций! Доступные значения: " + Arrays.toString(TransactionType.values()));
         }
     }
-
-//    @GetMapping("/get-my-transactions")
-//    @PreAuthorize("hasRole('USER')")
-//    public ResponseEntity<Page<TransactionResponse>> getAllMyTransaction(){
-//
-//    }
 }

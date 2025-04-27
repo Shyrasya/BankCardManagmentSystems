@@ -2,8 +2,6 @@ package com.bank.cardmanagment.web.exception;
 
 import com.bank.cardmanagment.exception.CardNotFoundException;
 import com.bank.cardmanagment.exception.UserNotFoundException;
-import jakarta.validation.ConstraintViolation;
-import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
@@ -21,7 +19,6 @@ import org.springframework.web.servlet.NoHandlerFoundException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,7 +36,7 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<?> handleMissingBody(HttpMessageNotReadableException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error","Отсутствует тело запроса или JSON некорректный!"));
+                .body(Map.of("error","Отсутствует тело запроса или JSON некорректный! " + e.getMessage()));
     }
 
     @ExceptionHandler(ResponseStatusException.class)
@@ -53,7 +50,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleAuthExceptions(RuntimeException e) {
         return ResponseEntity
                 .status(HttpStatus.UNAUTHORIZED)
-                .body(Map.of("error", "Неверные учетные данные!"));
+                .body(Map.of("error", "Неверные учетные данные! " + e.getMessage()));
     }
 
     @ExceptionHandler(UserNotFoundException.class)
@@ -74,7 +71,7 @@ public class GlobalExceptionHandler {
     public ResponseEntity<?> handleAccessDenied(AccessDeniedException e) {
         return ResponseEntity
                 .status(HttpStatus.FORBIDDEN)
-                .body(Map.of("error","Доступ запрещён: недостаточно прав!"));
+                .body(Map.of("error","Доступ запрещён: недостаточно прав! " + e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
@@ -97,16 +94,15 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(NoHandlerFoundException.class)
-    public ResponseEntity<Map<String, String>> handleNoHandlerFoundException(NoHandlerFoundException ex) {
+    public ResponseEntity<Map<String, String>> handleNoHandlerFoundException(NoHandlerFoundException e) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(Map.of("error", "Некорректный запрос: отсутствует обязательный параметр в пути!"));
+                .body(Map.of("error", "Некорректный запрос: отсутствует обязательный параметр в пути! " + e.getMessage()));
     }
-
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleUnexpectedException(Exception e) {
         return ResponseEntity
                 .status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(Map.of("error", "Внутренняя ошибка сервера!"));
+                .body(Map.of("error", "Внутренняя ошибка сервера! " + e.getMessage()));
     }
 }
