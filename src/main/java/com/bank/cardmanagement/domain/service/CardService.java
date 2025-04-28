@@ -1,23 +1,23 @@
 package com.bank.cardmanagement.domain.service;
 import com.bank.cardmanagement.datasource.repository.CardRepository;
+import com.bank.cardmanagement.datasource.repository.TransactionRepository;
 import com.bank.cardmanagement.datasource.repository.UserRepository;
 import com.bank.cardmanagement.dto.request.CardLimitRequest;
 import com.bank.cardmanagement.dto.request.CardRequest;
+import com.bank.cardmanagement.dto.request.WithdrawRequest;
 import com.bank.cardmanagement.dto.response.CardResponse;
 import com.bank.cardmanagement.exception.CardNotFoundException;
-import com.bank.cardmanagement.exception.ResourceNotFoundException;
 import com.bank.cardmanagement.exception.UserNotFoundException;
 import com.bank.cardmanagement.entity.*;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
-import org.springframework.security.access.AccessDeniedException;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.YearMonth;
 import java.util.Random;
 
 @Service
@@ -25,18 +25,26 @@ public class CardService {
     private final CardRepository cardRepository;
     private final UserRepository userRepository;
 
+    private final TransactionRepository transactionRepository;
+
     private final EncryptionService encryptionService;
 
-    public CardService(CardRepository cardRepository, UserRepository userRepository, EncryptionService encryptionService) {
+    private final CardValidationService cardValidationService;
+
+    public CardService(CardRepository cardRepository, UserRepository userRepository, TransactionRepository transactionRepository, EncryptionService encryptionService, CardValidationService cardValidationService) {
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
+        this.transactionRepository = transactionRepository;
         this.encryptionService = encryptionService;
+        this.cardValidationService = cardValidationService;
     }
+
 
     @Transactional
     public CardResponse createCard(CardRequest cardRequest){
         Long userId = cardRequest.getUserId();
-        User user = userRepository.findById(userId).orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new UserNotFoundException("Пользователь не найден"));
 
         String rawCardNumber;
         String encryptedCardNumber;
@@ -88,16 +96,14 @@ public class CardService {
 
     @Transactional
     public void blockCard(Long cardId) {
-        Card card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
+        Card card = cardValidationService.findById(cardId);
         card.setStatus(CardStatus.BLOCKED);
         cardRepository.save(card);
     }
 
     @Transactional
     public void activateCard(Long cardId){
-        Card card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
+        Card card = cardValidationService.findById(cardId);
         card.setStatus(CardStatus.ACTIVE);
         cardRepository.save(card);
     }
@@ -118,7 +124,7 @@ public class CardService {
     }
 
     public Page<CardResponse> getAllMyCards(CardStatus cardStatus, Pageable pageable){
-        Long userId = getCurrentUserId();
+        Long userId = cardValidationService.getCurrentUserId();
         if (cardStatus != null){
             return cardRepository.findByStatusAndUserId(cardStatus, userId, pageable)
                     .map(this::convertToCardResponse);
@@ -136,32 +142,16 @@ public class CardService {
                 card.getBalance());
     }
 
-    private Long getCurrentUserId(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long) {
-            return (Long) principal;
-        } else {
-            throw new IllegalStateException("Principal для UserId в JwtAuthentication не является типом Long!");
-        }
-    }
-
     @Transactional
     public void blockMyCard(Long cardId){
-        Long userId = getCurrentUserId();
-        Card card = cardRepository.findById(cardId)
-               .orElseThrow(() -> new CardNotFoundException("Карта с ID " + cardId + " не найдена!"));
-        if (!card.getUser().getId().equals(userId)){
-            throw new AccessDeniedException("Нет доступа к данной карте!");
-        }
+        Card card = cardValidationService.isMyCard(cardId);
         card.setStatus(CardStatus.BLOCKED);
         cardRepository.save(card);
     }
 
     @Transactional
     public void setCardLimits(Long cardId, CardLimitRequest request){
-        Card card = cardRepository.findById(cardId)
-                .orElseThrow(() -> new ResourceNotFoundException("Карта с id " + cardId + " не найдена"));
+        Card card = cardValidationService.findById(cardId);
         if (request.getDailyLimit() == null && request.getMonthlyLimit() == null) {
             throw new IllegalArgumentException("Не указано ни одного лимита!");
         }
@@ -173,4 +163,34 @@ public class CardService {
         }
         cardRepository.save(card);
     }
+
+    @Transactional
+    public void cashWithdraw(Long cardId, WithdrawRequest request){
+        Card card = cardValidationService.isMyCard(cardId);
+        cardValidationService.isActiveCard(card);
+        BigDecimal amount = request.getAmount();
+        cardValidationService.isEnoughMoney(card, amount);
+        LocalDateTime now = LocalDateTime.now();
+        LocalDateTime startOfDay = now.toLocalDate().atStartOfDay();
+        LocalDateTime endOfDay = startOfDay.plusDays(1).minusNanos(1);
+        YearMonth currentMonth = YearMonth.now();
+        LocalDateTime startOfMonth = currentMonth.atDay(1).atStartOfDay();
+        LocalDateTime endOfMonth = currentMonth.atEndOfMonth().atTime(23, 59, 59);
+        BigDecimal dailySpent = transactionRepository.getDailyWithdrawalSum(cardId, startOfDay, endOfDay);
+        BigDecimal monthlySpent = transactionRepository.getMonthlyWithdrawalSum(cardId, startOfMonth, endOfMonth);
+        BigDecimal dailyLimit = card.getDailyLimit();
+        BigDecimal monthlyLimit = card.getMonthlyLimit();
+
+        if (dailyLimit != null && dailySpent.add(amount).compareTo(dailyLimit) > 0){
+            throw new IllegalArgumentException("Превышен дневной лимит снятия наличных! Операция отклонена!");
+        }
+        if (monthlyLimit != null && monthlySpent.add(amount).compareTo(monthlyLimit) > 0){
+            throw new IllegalArgumentException("Превышен месячный лимит снятия наличных! Операция отклонена!");
+        }
+        card.setBalance(card.getBalance().subtract(amount));
+        cardRepository.save(card);
+        Transaction transaction = new Transaction(TransactionType.WITHDRAWAL, amount, request.getDescription(), LocalDateTime.now(), card);
+        transactionRepository.save(transaction);
+    }
+
 }

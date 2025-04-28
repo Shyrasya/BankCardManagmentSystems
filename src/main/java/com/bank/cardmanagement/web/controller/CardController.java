@@ -1,8 +1,11 @@
 package com.bank.cardmanagement.web.controller;
 
 import com.bank.cardmanagement.domain.service.CardService;
+import com.bank.cardmanagement.domain.service.TransferService;
 import com.bank.cardmanagement.dto.request.CardLimitRequest;
 import com.bank.cardmanagement.dto.request.CardRequest;
+import com.bank.cardmanagement.dto.request.TransferRequest;
+import com.bank.cardmanagement.dto.request.WithdrawRequest;
 import com.bank.cardmanagement.dto.response.CardResponse;
 import com.bank.cardmanagement.entity.CardStatus;
 import jakarta.validation.Valid;
@@ -25,8 +28,11 @@ public class CardController {
 
     private final CardService cardService;
 
-    public CardController(CardService cardService) {
+    private final TransferService transferService;
+
+    public CardController(CardService cardService, TransferService transferService) {
         this.cardService = cardService;
+        this.transferService = transferService;
     }
 
     @PostMapping("/create-card")
@@ -113,5 +119,20 @@ public class CardController {
                                                 @Valid @RequestBody CardLimitRequest request){
         cardService.setCardLimits(cardId, request);
         return ResponseEntity.ok("Лимиты успешно установлены!");
+    }
+
+    @PostMapping("/cash-withdraw/{cardId}")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> cashWithdraw(@PathVariable Long cardId,
+                                               @Valid @RequestBody WithdrawRequest request){
+        cardService.cashWithdraw(cardId, request);
+        return ResponseEntity.ok("Успешное снятие наличных средств!");
+    }
+
+    @PostMapping("/transfer-between-cards")
+    @PreAuthorize("hasRole('USER')")
+    public ResponseEntity<String> transferBetweenCards(@Valid @RequestBody TransferRequest request){
+        transferService.transferBetweenCards(request);
+        return ResponseEntity.ok("Успешный перевод между картами!");
     }
 }

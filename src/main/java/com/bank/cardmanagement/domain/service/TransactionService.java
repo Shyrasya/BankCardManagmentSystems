@@ -18,9 +18,12 @@ public class TransactionService {
 
     private final CardRepository cardRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, CardRepository cardRepository) {
+    private final CardValidationService cardValidationService;
+
+    public TransactionService(TransactionRepository transactionRepository, CardRepository cardRepository, CardValidationService cardValidationService) {
         this.transactionRepository = transactionRepository;
         this.cardRepository = cardRepository;
+        this.cardValidationService = cardValidationService;
     }
 
 
@@ -41,7 +44,7 @@ public class TransactionService {
     }
 
     public Page<TransactionResponse> getAllMyTransactions(TransactionType transactionType, Long cardId, Pageable pageable) {
-        Long userId = getCurrentUserId();
+        Long userId = cardValidationService.getCurrentUserId();
         if (cardId != null){
             boolean isMyCard = cardRepository.existsByIdAndUserId(cardId, userId);
             if (!isMyCard){
@@ -67,18 +70,9 @@ public class TransactionService {
         return new TransactionResponse(
                 transaction.getId(),
                 transaction.getType().toString(),
+                transaction.getAmount(),
                 transaction.getDescription(),
                 transaction.getTimestamp());
-    }
-
-    private Long getCurrentUserId(){
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        Object principal = authentication.getPrincipal();
-        if (principal instanceof Long) {
-            return (Long) principal;
-        } else {
-            throw new IllegalStateException("Principal для UserId в JwtAuthentication не является типом Long!");
-        }
     }
 
 }

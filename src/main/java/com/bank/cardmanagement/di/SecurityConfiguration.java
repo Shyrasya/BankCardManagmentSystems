@@ -22,10 +22,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity
 public class SecurityConfiguration {
 
-    @Bean
-    public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider provider, JwtUtil util) {
-        return new UserService(userRepository, passwordEncoder, provider, util);
-    }
+//    @Bean
+//    public UserService userService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider provider, JwtUtil util) {
+//        return new UserService(userRepository, passwordEncoder, provider, util);
+//    }
 
     @Bean
     public JwtProvider provider() {
