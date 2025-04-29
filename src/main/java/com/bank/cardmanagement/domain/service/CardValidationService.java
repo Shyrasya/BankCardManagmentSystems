@@ -13,7 +13,7 @@ import java.math.BigDecimal;
 
 @Service
 public class CardValidationService {
-    public final CardRepository cardRepository;
+    private final CardRepository cardRepository;
 
 
     public CardValidationService(CardRepository cardRepository) {

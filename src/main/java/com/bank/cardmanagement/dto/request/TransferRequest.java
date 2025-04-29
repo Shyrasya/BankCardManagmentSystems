@@ -30,4 +30,16 @@ public class TransferRequest {
     public BigDecimal getAmount() {
         return amount;
     }
+
+    public void setSourceCardId(Long sourceCardId) {
+        this.sourceCardId = sourceCardId;
+    }
+
+    public void setDestinationCardId(Long destinationCardId) {
+        this.destinationCardId = destinationCardId;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
 }

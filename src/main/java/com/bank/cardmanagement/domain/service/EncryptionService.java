@@ -19,7 +19,7 @@ public class EncryptionService {
     public void init(){
         byte[] keyBytes = secretKeyRaw.getBytes();
         if (keyBytes.length != 16){
-            throw new IllegalArgumentException("Ключ должен быть длиной 16 байт");
+            throw new IllegalArgumentException("Ключ должен быть длиной 16 байт!");
         }
         this.secretKeySpec = new SecretKeySpec(keyBytes, "AES");
     }
@@ -31,7 +31,7 @@ public class EncryptionService {
             byte[] encryptedBytes = cipher.doFinal(data.getBytes());
             return Base64.getEncoder().encodeToString(encryptedBytes);
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка при шифровании", e);
+            throw new RuntimeException("Ошибка при шифровании!", e);
         }
     }
 
@@ -42,7 +42,7 @@ public class EncryptionService {
             byte[] decryptedBytes = cipher.doFinal(Base64.getDecoder().decode(encryptedData));
             return new String(decryptedBytes);
         } catch (Exception e) {
-            throw new RuntimeException("Ошибка при дешифровании", e);
+            throw new RuntimeException("Ошибка при дешифровании!", e);
         }
     }
 

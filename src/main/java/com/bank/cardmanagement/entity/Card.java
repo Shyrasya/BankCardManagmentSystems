@@ -104,4 +104,8 @@ public class Card {
     public void setMonthlyLimit(BigDecimal monthlyLimit) {
         this.monthlyLimit = monthlyLimit;
     }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 }

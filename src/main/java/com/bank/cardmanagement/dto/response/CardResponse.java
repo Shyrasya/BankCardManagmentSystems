@@ -9,13 +9,15 @@ public class CardResponse {
     private String expirationDate;
     private String status;
     private BigDecimal balance;
+    private Long userId;
 
-    public CardResponse(Long id, String maskedCardNumber, String expirationDate, String status, BigDecimal balance) {
+    public CardResponse(Long id, String maskedCardNumber, String expirationDate, String status, BigDecimal balance, Long userId) {
         this.id = id;
         this.maskedCardNumber = maskedCardNumber;
         this.expirationDate = expirationDate;
         this.status = status;
         this.balance = balance;
+        this.userId = userId;
     }
 
     public Long getId() {
@@ -36,5 +38,9 @@ public class CardResponse {
 
     public BigDecimal getBalance() {
         return balance;
+    }
+
+    public Long getUserId() {
+        return userId;
     }
 }

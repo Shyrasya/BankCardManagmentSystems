@@ -69,7 +69,8 @@ public class CardService {
                 maskedCardNumber,
                 saved.getExpirationDate().toString(),
                 saved.getStatus().name(),
-                saved.getBalance());
+                saved.getBalance(),
+                saved.getUser().getId());
     }
 
     private String generateCardNumber(){
@@ -93,10 +94,22 @@ public class CardService {
         cardRepository.deleteById(cardId);
     }
 
-
     @Transactional
     public void blockCard(Long cardId) {
         Card card = cardValidationService.findById(cardId);
+        blockCardInternal(card);
+    }
+
+    @Transactional
+    public void blockMyCard(Long cardId){
+        Card card = cardValidationService.isMyCard(cardId);
+        blockCardInternal(card);
+    }
+
+    private void blockCardInternal(Card card) {
+        if (!card.getStatus().equals(CardStatus.ACTIVE)) {
+            throw new IllegalStateException("Карта с ID " + card.getId() + " не является активной!");
+        }
         card.setStatus(CardStatus.BLOCKED);
         cardRepository.save(card);
     }
@@ -139,14 +152,8 @@ public class CardService {
                 maskCardNumber(encryptionService.decrypt(card.getEncryptedCardNumber())),
                 card.getExpirationDate().toString(),
                 card.getStatus().name(),
-                card.getBalance());
-    }
-
-    @Transactional
-    public void blockMyCard(Long cardId){
-        Card card = cardValidationService.isMyCard(cardId);
-        card.setStatus(CardStatus.BLOCKED);
-        cardRepository.save(card);
+                card.getBalance(),
+                card.getUser().getId());
     }
 
     @Transactional

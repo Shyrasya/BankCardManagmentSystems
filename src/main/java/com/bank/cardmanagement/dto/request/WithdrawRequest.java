@@ -6,6 +6,7 @@ import jakarta.validation.constraints.Positive;
 import java.math.BigDecimal;
 
 public class WithdrawRequest {
+
     @NotNull
     @Positive
     private BigDecimal amount;
@@ -18,5 +19,13 @@ public class WithdrawRequest {
 
     public String getDescription() {
         return description;
+    }
+
+    public void setAmount(BigDecimal amount) {
+        this.amount = amount;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
     }
 }
