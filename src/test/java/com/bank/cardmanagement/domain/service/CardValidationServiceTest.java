@@ -37,6 +37,7 @@ public class CardValidationServiceTest {
     }
     @Test
     void isMyCard_shouldReturnCheckedCard(){
+        SecurityContextHolder.clearContext();
         Card card = new Card();
         User user = new User();
         user.setId(5L);
@@ -51,6 +52,7 @@ public class CardValidationServiceTest {
 
     @Test
     void isMyCard_shouldThrowExceptionIfNotMyCard(){
+        SecurityContextHolder.clearContext();
         Card card = new Card();
         User user = new User();
         user.setId(9L);
@@ -87,6 +89,7 @@ public class CardValidationServiceTest {
 
     @Test
     void getCurrentUserId_shouldReturnUserId() {
+        SecurityContextHolder.clearContext();
         mockPrincipal(7L);
 
         Long result = cardValidationService.getCurrentUserId();
@@ -96,6 +99,7 @@ public class CardValidationServiceTest {
 
     @Test
     void getCurrentUserId_shouldThrowExceptionIfPrincipalIsNotLong() {
+        SecurityContextHolder.clearContext();
         Authentication authentication = mock(Authentication.class);
         Mockito.when(authentication.getPrincipal()).thenReturn("not a long");
         SecurityContextHolder.getContext().setAuthentication(authentication);

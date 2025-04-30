@@ -18,7 +18,6 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -50,8 +49,8 @@ public class UserService {
     public JwtResponse authorization(JwtRequest request) {
         String inputEmail = request.getEmail();
         String inputPassword = request.getPassword();
-        User user = userRepository.findByEmail(inputEmail).orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
-        PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        User user = userRepository.findByEmail(inputEmail)
+                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден!"));
         if (!passwordEncoder.matches(inputPassword, user.getPassword())) {
             throw new BadCredentialsException("Неверный пароль!");
         }
@@ -77,7 +76,7 @@ public class UserService {
                 throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Срок годности refresh-токена истек!");
             }
             if (tokenType == TokenType.REFRESH) {
-                refreshToken = provider.generateAccessToken(user);
+                refreshToken = provider.generateRefreshToken(user);
                 userRepository.updateRefreshTokenByUuid(user.getId(), refreshToken);
             }
 
@@ -85,8 +84,10 @@ public class UserService {
             return new JwtResponse(newAccessToken, refreshToken, accessTokenExpiration / 1000);
         } catch (SecurityException e) {
             throw unauthorized("Поддельный токен!");
+        } catch (ResponseStatusException e) {
+            throw e;
         } catch (Exception e) {
-            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Серверная ошибка при обновлении токена", e);
+            throw new ResponseStatusException(HttpStatus.INTERNAL_SERVER_ERROR, "Серверная ошибка при обновлении токена!", e);
         }
     }
 
