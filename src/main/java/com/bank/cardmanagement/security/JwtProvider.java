@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.Date;
+import java.util.Objects;
 
 public class JwtProvider {
     @Value("${jwt.access-token-expiration}")
@@ -61,7 +62,7 @@ public class JwtProvider {
 
     public boolean validateRefreshToken(User user, String refreshToken) {
         String userRefreshToken = user.getRefreshToken();
-        return userRefreshToken.equals(refreshToken);
+        return Objects.equals(user.getRefreshToken(), refreshToken);
     }
 
     public Claims validateToken(String token) {

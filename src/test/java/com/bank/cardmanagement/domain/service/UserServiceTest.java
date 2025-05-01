@@ -11,6 +11,8 @@ import com.bank.cardmanagement.security.JwtProvider;
 import com.bank.cardmanagement.security.JwtUtil;
 import com.bank.cardmanagement.security.model.JwtAuthentication;
 import io.jsonwebtoken.Claims;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -49,6 +51,9 @@ public class UserServiceTest {
 
     @Mock
     private PasswordEncoder passwordEncoder;
+
+    @Mock
+    private EntityManager entityManager;
 
     private final String email = "test@example.com";
     private final String password = "password";
@@ -197,6 +202,7 @@ public class UserServiceTest {
         Mockito.when(provider.validateRefreshToken(user, oldRefreshToken)).thenReturn(true);
         Mockito.when(provider.generateRefreshToken(user)).thenReturn(newRefreshToken);
         Mockito.doNothing().when(userRepository).updateRefreshTokenByUuid(Mockito.anyLong(), Mockito.anyString());
+        Mockito.doNothing().when(entityManager).clear();
         Mockito.when(provider.generateAccessToken(user)).thenReturn(newAccessToken);
 
         JwtResponse response = userService.updateToken(oldRefreshToken, TokenType.REFRESH);
@@ -288,6 +294,21 @@ public class UserServiceTest {
                 userService.createUser(request));
 
         Assertions.assertEquals("Пользователь с таким email уже существует!", exception.getMessage());
+        Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
+    }
+
+    @Test
+    void createUser_shouldThrowExceptionIfRoleIncorrect() {
+        UserRequest request = new UserRequest();
+        request.setEmail("test@example.com");
+        request.setPassword("password123");
+        request.setRole("HOST");
+        Mockito.when(userRepository.existsByEmail("test@example.com")).thenReturn(false);
+
+        IllegalArgumentException exception = Assertions.assertThrows(IllegalArgumentException.class, () ->
+                userService.createUser(request));
+
+        Assertions.assertEquals("Неверная роль пользователя! Доступные значения: [USER, ADMIN]", exception.getMessage());
         Mockito.verify(userRepository, Mockito.never()).save(Mockito.any());
     }
 

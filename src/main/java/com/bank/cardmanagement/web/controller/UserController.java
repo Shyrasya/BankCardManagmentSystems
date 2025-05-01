@@ -26,17 +26,8 @@ public class UserController {
     @PostMapping("/create-user")
     @PreAuthorize("hasRole('ADMIN')")
     public ResponseEntity<String> createUser(@Valid @RequestBody UserRequest userRequest){
-        parseRole(userRequest.getRole());
         userService.createUser(userRequest);
         return ResponseEntity.ok("Пользователь успешно создан!");
-    }
-
-    private void parseRole(String role) {
-        try {
-            Role.valueOf(role.toUpperCase());
-        } catch (IllegalArgumentException e) {
-            throw new IllegalArgumentException("Неверная роль пользователя! Доступные значения: " + Arrays.toString(Role.values()));
-        }
     }
 
     @DeleteMapping("/delete-user/{userId}")

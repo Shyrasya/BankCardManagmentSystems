@@ -12,6 +12,8 @@ import com.bank.cardmanagement.security.JwtProvider;
 import com.bank.cardmanagement.security.JwtUtil;
 import com.bank.cardmanagement.security.model.JwtAuthentication;
 import io.jsonwebtoken.Claims;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -22,6 +24,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.server.ResponseStatusException;
+
+import java.util.Arrays;
 
 @Service
 public class UserService {
@@ -34,16 +38,19 @@ public class UserService {
 
     private final JwtUtil util;
 
+
+    private final EntityManager entityManager;
+
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
 
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider provider, JwtUtil util) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider provider, JwtUtil util, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
         this.provider = provider;
         this.util = util;
+        this.entityManager = entityManager;
     }
-
 
     @Transactional
     public JwtResponse authorization(JwtRequest request) {
@@ -57,6 +64,7 @@ public class UserService {
         String accessToken = provider.generateAccessToken(user);
         String refreshToken = provider.generateRefreshToken(user);
         userRepository.updateRefreshTokenByUuid(user.getId(), refreshToken);
+        entityManager.clear();
         return new JwtResponse(accessToken, refreshToken, accessTokenExpiration / 1000);
     }
 
@@ -78,6 +86,7 @@ public class UserService {
             if (tokenType == TokenType.REFRESH) {
                 refreshToken = provider.generateRefreshToken(user);
                 userRepository.updateRefreshTokenByUuid(user.getId(), refreshToken);
+                entityManager.clear();
             }
 
             String newAccessToken = provider.generateAccessToken(user);
@@ -129,6 +138,7 @@ public class UserService {
         if (isUserExist){
             throw new EmailAlreadyExistsException("Пользователь с таким email уже существует!");
         }
+        parseRole(userRequest.getRole());
         User user = new User();
         user.setEmail(email);
         String rawPassword = userRequest.getPassword();
@@ -136,6 +146,14 @@ public class UserService {
         user.setPassword(encodedPassword);
         user.setRole(Role.valueOf(userRequest.getRole().toUpperCase()));
         userRepository.save(user);
+    }
+
+    private void parseRole(String role) {
+        try {
+            Role.valueOf(role.toUpperCase());
+        } catch (IllegalArgumentException e) {
+            throw new IllegalArgumentException("Неверная роль пользователя! Доступные значения: " + Arrays.toString(Role.values()));
+        }
     }
 
     @Transactional

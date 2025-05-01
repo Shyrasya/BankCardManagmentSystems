@@ -32,11 +32,11 @@ public class Card {
     @Column(precision = 19, scale = 2)
     private BigDecimal balance;
 
-    @Column(name = "daily_limit", precision = 19, scale = 2)
-    private BigDecimal dailyLimit;
+    @Column(name = "daily_limit", nullable = false)
+    private BigDecimal dailyLimit = BigDecimal.valueOf(100_000.00);
 
-    @Column(name = "monthly_limit", precision = 19, scale = 2)
-    private BigDecimal monthlyLimit;
+    @Column(name = "monthly_limit", nullable = false)
+    private BigDecimal monthlyLimit = BigDecimal.valueOf(1_000_000.00);
 
 
     @OneToMany(mappedBy = "card", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -44,6 +44,24 @@ public class Card {
 
     public Card() {
     }
+
+    public Card(User user,
+                String encryptedCardNumber,
+                LocalDate expirationDate,
+                CardStatus status,
+                BigDecimal balance,
+                BigDecimal dailyLimit,
+                BigDecimal monthlyLimit) {
+        this.user = user;
+        this.encryptedCardNumber = encryptedCardNumber;
+        this.expirationDate = expirationDate;
+        this.status = status;
+        this.balance = balance;
+        this.dailyLimit = dailyLimit != null ? dailyLimit : BigDecimal.valueOf(100_000.00);
+        this.monthlyLimit = monthlyLimit != null ? monthlyLimit : BigDecimal.valueOf(1_000_000.00);
+    }
+
+
 
     public void setEncryptedCardNumber(String encryptedCardNumber) {
         this.encryptedCardNumber = encryptedCardNumber;

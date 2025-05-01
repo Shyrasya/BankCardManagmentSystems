@@ -38,6 +38,9 @@ public class Transaction {
         this.card = card;
     }
 
+    public Transaction() {
+    }
+
     public Long getId() {
         return id;
     }

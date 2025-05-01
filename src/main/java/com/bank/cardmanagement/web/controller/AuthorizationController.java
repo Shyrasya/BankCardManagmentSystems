@@ -6,7 +6,6 @@ import com.bank.cardmanagement.dto.response.JwtResponse;
 import com.bank.cardmanagement.dto.request.TokenRequest;
 import com.bank.cardmanagement.entity.TokenType;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -43,12 +42,8 @@ public class AuthorizationController {
 
     @PostMapping("/delete-refresh")
     public ResponseEntity<?> deleteRefreshToken() {
-        try {
-            userService.deleteRefreshToken();
-            SecurityContextHolder.clearContext();
-            return ResponseEntity.ok("Пользователь успешно вышел!");
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при выходе: " + e.getMessage());
-        }
+        userService.deleteRefreshToken();
+        SecurityContextHolder.clearContext();
+        return ResponseEntity.ok("Пользователь успешно вышел!");
     }
 }
