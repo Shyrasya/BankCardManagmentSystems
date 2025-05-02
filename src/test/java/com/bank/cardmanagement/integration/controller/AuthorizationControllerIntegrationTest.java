@@ -5,6 +5,7 @@ import com.bank.cardmanagement.dto.response.JwtResponse;
 import com.bank.cardmanagement.entity.Role;
 import com.bank.cardmanagement.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,6 +49,11 @@ public class AuthorizationControllerIntegrationTest extends AbstractIntegrationT
         JwtResponse tokens = loginAndGetTokens("testuser@example.com", "123456");
         this.accessToken = tokens.getAccessToken();
         this.refreshToken = tokens.getRefreshToken();
+    }
+
+    @AfterEach
+    void tearDown() {
+        userRepository.deleteByEmail("testuser@example.com");
     }
 
     @Test
