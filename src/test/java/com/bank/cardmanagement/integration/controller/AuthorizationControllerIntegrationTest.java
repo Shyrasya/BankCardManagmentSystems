@@ -5,7 +5,6 @@ import com.bank.cardmanagement.dto.response.JwtResponse;
 import com.bank.cardmanagement.entity.Role;
 import com.bank.cardmanagement.entity.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,7 +12,6 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -21,8 +19,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class AuthorizationControllerIntegrationTest {
+public class AuthorizationControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -48,33 +45,9 @@ public class AuthorizationControllerIntegrationTest {
             userRepository.save(user);
         }
 
-        JwtResponse tokens = loginAndGetTokens();
+        JwtResponse tokens = loginAndGetTokens("testuser@example.com", "123456");
         this.accessToken = tokens.getAccessToken();
         this.refreshToken = tokens.getRefreshToken();
-    }
-
-    @AfterEach
-    void tearDown() {
-        userRepository.deleteByEmail("testuser@example.com");
-    }
-
-    private JwtResponse loginAndGetTokens() throws Exception {
-        String jsonRequest = """
-                    {
-                      "email": "testuser@example.com",
-                      "password": "123456"
-                    }
-                """;
-
-        String jsonResponse = mockMvc.perform(post("/card-management/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return objectMapper.readValue(jsonResponse, JwtResponse.class);
     }
 
     @Test

@@ -13,9 +13,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
-import org.springframework.transaction.annotation.Transactional;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -24,8 +22,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class UserControllerIntegrationTest {
+public class UserControllerIntegrationTest extends AbstractIntegrationTest {
     @Autowired
     private MockMvc mockMvc;
 
@@ -50,7 +47,7 @@ public class UserControllerIntegrationTest {
             userRepository.save(user);
         }
 
-        JwtResponse tokens = loginAndGetTokens();
+        JwtResponse tokens = loginAndGetTokens("testadmin@example.com", "123456");
         this.accessAdminToken = tokens.getAccessToken();
     }
 
@@ -58,25 +55,6 @@ public class UserControllerIntegrationTest {
     void tearDown() {
         userRepository.deleteByEmail("testadmin@example.com");
         userRepository.deleteByEmail("newuser@example.com");
-    }
-
-    private JwtResponse loginAndGetTokens() throws Exception {
-        String jsonRequest = """
-                    {
-                      "email": "testadmin@example.com",
-                      "password": "123456"
-                    }
-                """;
-
-        String jsonResponse = mockMvc.perform(post("/card-management/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return objectMapper.readValue(jsonResponse, JwtResponse.class);
     }
 
     @Test

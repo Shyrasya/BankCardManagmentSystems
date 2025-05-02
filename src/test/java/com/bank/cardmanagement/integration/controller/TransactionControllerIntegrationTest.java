@@ -3,7 +3,6 @@ package com.bank.cardmanagement.integration.controller;
 import com.bank.cardmanagement.datasource.repository.CardRepository;
 import com.bank.cardmanagement.datasource.repository.TransactionRepository;
 import com.bank.cardmanagement.datasource.repository.UserRepository;
-import com.bank.cardmanagement.dto.response.JwtResponse;
 import com.bank.cardmanagement.entity.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
@@ -12,9 +11,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -23,14 +20,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@DirtiesContext(classMode = DirtiesContext.ClassMode.AFTER_CLASS)
-public class TransactionControllerIntegrationTest {
+public class TransactionControllerIntegrationTest extends AbstractIntegrationTest {
 
     @Autowired
     private MockMvc mockMvc;
@@ -91,25 +86,6 @@ public class TransactionControllerIntegrationTest {
         }
         userRepository.deleteByEmail("testadmin@example.com");
         userRepository.deleteByEmail("testuser@example.com");
-    }
-
-    private JwtResponse loginAndGetTokens(String email, String password) throws Exception {
-        String jsonRequest = String.format("""
-                    {
-                      "email": "%s",
-                      "password": "%s"
-                    }
-                """, email, password);
-
-        String jsonResponse = mockMvc.perform(post("/card-management/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(jsonRequest))
-                .andExpect(status().isOk())
-                .andReturn()
-                .getResponse()
-                .getContentAsString();
-
-        return objectMapper.readValue(jsonResponse, JwtResponse.class);
     }
 
     @Test
