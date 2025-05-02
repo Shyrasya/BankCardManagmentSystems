@@ -15,13 +15,35 @@ import org.springframework.web.filter.GenericFilterBean;
 
 import java.io.IOException;
 
+/**
+ * Фильтр для обработки JWT-аутентификации.
+ * Пропускает только запросы с валидным access-токеном,
+ * кроме эндпоинта /card-management/auth/login.
+ */
 public class AuthFilter extends GenericFilterBean {
+
+    /**
+     * Cервис для работы с пользователями и токенами
+     */
     private final UserService userService;
 
+    /**
+     * Конструктор фильтра с внедрением UserService.
+     *
+     * @param userService сервис для работы с пользователями и токенами
+     */
     public AuthFilter(UserService userService) {
         this.userService = userService;
     }
 
+    /**
+     * Проверяет наличие и валидность JWT access-токена в заголовке запроса.
+     * Устанавливает аутентификацию в контекст безопасности.
+     *
+     * @param request  HTTP-запрос
+     * @param response HTTP-ответ
+     * @param chain    цепочка фильтров
+     */
     @Override
     public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
             throws IOException, ServletException {

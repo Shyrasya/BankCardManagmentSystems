@@ -4,10 +4,23 @@ import jakarta.validation.constraints.PositiveOrZero;
 
 import java.math.BigDecimal;
 
+/**
+ * Класс запроса на установку лимитов банковской карты.
+ * Содержит дневной и месячный лимиты. Оба значения не могут быть отрицательными.
+ */
 public class CardLimitRequest {
+
+    /**
+     * Дневной лимит по карте.
+     * Может быть ноль или положительное значение.
+     */
     @PositiveOrZero(message = "Дневной лимит не может быть отрицательным!")
     private BigDecimal dailyLimit;
 
+    /**
+     * Месячный лимит по карте.
+     * Может быть ноль или положительное значение.
+     */
     @PositiveOrZero(message = "Месячный лимит не может быть отрицательным!")
     private BigDecimal monthlyLimit;
 

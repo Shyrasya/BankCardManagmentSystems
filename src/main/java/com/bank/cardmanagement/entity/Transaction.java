@@ -2,34 +2,65 @@ package com.bank.cardmanagement.entity;
 
 import jakarta.persistence.*;
 
-import java.time.LocalDateTime;
 import java.math.BigDecimal;
+import java.time.LocalDateTime;
 
+/**
+ * Сущность транзакции для банковской карты.
+ * Представляет собой запись о финансовой операции, связанной с картой.
+ */
 @Entity
 @Table(name = "transactions")
 public class Transaction {
 
+    /**
+     * Уникальный идентификатор транзакции.
+     */
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * Тип транзакции (например, создание, блокировка, снятие средств и т. д.).
+     */
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TransactionType type;
 
+    /**
+     * Сумма транзакции.
+     */
     @Column(nullable = false, precision = 19, scale = 2)
     private BigDecimal amount;
 
+    /**
+     * Описание транзакции (например, причина снятия средств или описание перевода).
+     */
     @Column(length = 255)
     private String description;
 
+    /**
+     * Время, когда транзакция была совершена.
+     */
     @Column(nullable = false)
     private LocalDateTime timestamp;
 
+    /**
+     * Карта, с которой была произведена транзакция.
+     */
     @ManyToOne
     @JoinColumn(name = "card_id", nullable = false)
     private Card card;
 
+    /**
+     * Конструктор для создания новой транзакции.
+     *
+     * @param type        тип транзакции
+     * @param amount      сумма транзакции
+     * @param description описание транзакции
+     * @param timestamp   время транзакции
+     * @param card        карта, с которой была совершена транзакция
+     */
     public Transaction(TransactionType type, BigDecimal amount, String description, LocalDateTime timestamp, Card card) {
         this.type = type;
         this.amount = amount;
@@ -38,6 +69,9 @@ public class Transaction {
         this.card = card;
     }
 
+    /**
+     * Конструктор без параметров.
+     */
     public Transaction() {
     }
 

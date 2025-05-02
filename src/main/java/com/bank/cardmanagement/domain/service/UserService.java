@@ -13,7 +13,6 @@ import com.bank.cardmanagement.security.JwtUtil;
 import com.bank.cardmanagement.security.model.JwtAuthentication;
 import io.jsonwebtoken.Claims;
 import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -27,23 +26,54 @@ import org.springframework.web.server.ResponseStatusException;
 
 import java.util.Arrays;
 
+/**
+ * Сервисный класс для работы с пользователями.
+ * Отвечает за авторизацию, генерацию и обновление JWT токенов, а также за операции с refresh-токеном.
+ */
 @Service
 public class UserService {
 
+    /**
+     * Репозиторий пользователей
+     */
     private final UserRepository userRepository;
 
+    /**
+     * Компонент для шифрования и проверки паролей
+     */
     private final PasswordEncoder passwordEncoder;
 
+    /**
+     * Провайдер для генерации и валидации JWT токенов
+     */
     private final JwtProvider provider;
 
+    /**
+     * Утильный класс для создания объекта аутентификации из JWT
+     */
     private final JwtUtil util;
 
-
+    /**
+     * Менеджер сущностей для управления кэшом JPA
+     */
     private final EntityManager entityManager;
 
+    /**
+     * Время жизни access-токена в миллисекундах.
+     * Значение считывается из файла конфигурации application.yml
+     */
     @Value("${jwt.access-token-expiration}")
     private long accessTokenExpiration;
 
+    /**
+     * Конструктор сервиса пользователей.
+     *
+     * @param userRepository  репозиторий пользователей
+     * @param passwordEncoder компонент для шифрования и проверки паролей
+     * @param provider        провайдер для генерации и валидации JWT токенов
+     * @param util            утильный класс для создания объекта аутентификации из JWT
+     * @param entityManager   менеджер сущностей для управления кэшом JPA
+     */
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder, JwtProvider provider, JwtUtil util, EntityManager entityManager) {
         this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
@@ -52,6 +82,13 @@ public class UserService {
         this.entityManager = entityManager;
     }
 
+    /**
+     * Авторизует пользователя по email и паролю.
+     * Генерирует access и refresh токены.
+     *
+     * @param request объект с email и паролем
+     * @return JwtResponse с access/refresh токенами и временем жизни
+     */
     @Transactional
     public JwtResponse authorization(JwtRequest request) {
         String inputEmail = request.getEmail();
@@ -68,6 +105,14 @@ public class UserService {
         return new JwtResponse(accessToken, refreshToken, accessTokenExpiration / 1000);
     }
 
+    /**
+     * Обновляет токены по refresh-токену и типу запроса.
+     * Генерирует новый access-токен, а при необходимости — новый refresh-токен.
+     *
+     * @param refreshToken refresh-токен
+     * @param tokenType    тип запроса (ACCESS или REFRESH)
+     * @return JwtResponse с новыми токенами
+     */
     @Transactional
     public JwtResponse updateToken(String refreshToken, TokenType tokenType) {
         try {
@@ -100,6 +145,12 @@ public class UserService {
         }
     }
 
+    /**
+     * Извлекает ID пользователя из claims.
+     *
+     * @param claims claims из токена
+     * @return ID пользователя
+     */
     private Long extractUserId(Claims claims) {
         try {
             return Long.parseLong(claims.getSubject());
@@ -108,34 +159,65 @@ public class UserService {
         }
     }
 
+    /**
+     * Генерирует исключение с HTTP-статусом 401 (UNAUTHORIZED).
+     *
+     * @param message сообщение ошибки
+     * @return ResponseStatusException с кодом 401
+     */
     private ResponseStatusException unauthorized(String message) {
         return new ResponseStatusException(HttpStatus.UNAUTHORIZED, message);
     }
 
+    /**
+     * Удаляет refresh-токен текущего пользователя из базы.
+     */
     @Transactional
     public void deleteRefreshToken() {
         Long id = getUserId();
         userRepository.deleteRefreshTokenByUuid(id);
     }
 
+    /**
+     * Получает ID текущего пользователя из контекста безопасности.
+     *
+     * @return ID пользователя
+     */
     private Long getUserId() {
         Authentication jwtAuth = SecurityContextHolder.getContext().getAuthentication();
         return Long.parseLong(jwtAuth.getName());
     }
 
+    /**
+     * Валидирует access-токен и возвращает Claims.
+     *
+     * @param accessToken access-токен
+     * @return Claims из токена
+     */
     public Claims providerValidateAccessToken(String accessToken) {
         return provider.validateAccessToken(accessToken);
     }
 
+    /**
+     * Создаёт объект аутентификации на основе токена.
+     *
+     * @param claims claims из токена
+     * @return объект JwtAuthentication
+     */
     public JwtAuthentication getJwtAuthentication(Claims claims) {
         return util.createAuthentication(claims);
     }
 
+    /**
+     * Регистрирует нового пользователя.
+     *
+     * @param userRequest объект с email, паролем и ролью
+     */
     @Transactional
-    public void createUser(UserRequest userRequest){
+    public void createUser(UserRequest userRequest) {
         String email = userRequest.getEmail();
         boolean isUserExist = userRepository.existsByEmail(email);
-        if (isUserExist){
+        if (isUserExist) {
             throw new EmailAlreadyExistsException("Пользователь с таким email уже существует!");
         }
         parseRole(userRequest.getRole());
@@ -148,6 +230,11 @@ public class UserService {
         userRepository.save(user);
     }
 
+    /**
+     * Проверяет корректность переданной роли пользователя.
+     *
+     * @param role роль в виде строки
+     */
     private void parseRole(String role) {
         try {
             Role.valueOf(role.toUpperCase());
@@ -156,9 +243,14 @@ public class UserService {
         }
     }
 
+    /**
+     * Удаляет пользователя по его ID.
+     *
+     * @param userId ID пользователя
+     */
     @Transactional
-    public void deleteUser(Long userId){
-        if (!userRepository.existsById(userId)){
+    public void deleteUser(Long userId) {
+        if (!userRepository.existsById(userId)) {
             throw new IllegalArgumentException("Пользователь с ID " + userId + " не найден!");
         }
         userRepository.deleteById(userId);

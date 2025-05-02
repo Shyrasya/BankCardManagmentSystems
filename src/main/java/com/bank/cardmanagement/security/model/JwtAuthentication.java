@@ -6,11 +6,33 @@ import org.springframework.security.core.GrantedAuthority;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Реализация интерфейса Authentication, представляющая собой аутентификацию через JWT токен.
+ * Содержит информацию о пользователе (ID) и его роли.
+ */
 public class JwtAuthentication implements Authentication {
+
+    /**
+     * ID пользователя, связанный с аутентификацией.
+     */
     private final Long id;
+
+    /**
+     * Роль пользователя в системе.
+     */
     private final GrantedAuthority role;
+
+    /**
+     * Статус аутентификации пользователя.
+     */
     private boolean isAuthenticated;
 
+    /**
+     * Конструктор для создания объекта JwtAuthentication.
+     *
+     * @param id   уникальный идентификатор пользователя
+     * @param role роль пользователя в системе
+     */
     public JwtAuthentication(Long id, GrantedAuthority role) {
         this.id = id;
         this.role = role;
