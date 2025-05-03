@@ -40,3 +40,4 @@ build/
 
 application.yml
 004-insert-initial-users.yaml
+.env

@@ -51,7 +51,10 @@ public class AuthFilter extends GenericFilterBean {
         HttpServletResponse httpResponse = (HttpServletResponse) response;
         String path = httpRequest.getRequestURI();
 
-        if (path.equals("/card-management/auth/login")) {
+        if (path.equals("/card-management/auth/login") ||
+                path.startsWith("/swagger-ui") ||
+                path.startsWith("/v3/api-docs") ||
+                path.equals("/swagger-ui.html")) {
             chain.doFilter(request, response);
             return;
         }
