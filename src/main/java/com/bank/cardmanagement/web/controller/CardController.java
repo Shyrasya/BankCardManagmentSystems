@@ -8,6 +8,8 @@ import com.bank.cardmanagement.dto.request.TransferRequest;
 import com.bank.cardmanagement.dto.request.WithdrawRequest;
 import com.bank.cardmanagement.dto.response.CardResponse;
 import com.bank.cardmanagement.entity.CardStatus;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -60,6 +62,7 @@ public class CardController {
      */
     @PostMapping("/create-card")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<CardResponse> createCard(@Valid @RequestBody CardRequest cardRequest) {
         CardResponse response = cardService.createCard(cardRequest);
         return ResponseEntity.ok(response);
@@ -74,6 +77,7 @@ public class CardController {
      */
     @DeleteMapping("/delete-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> deleteCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId) {
         cardService.deleteCard(cardId);
         return ResponseEntity.ok("Карта с ID " + cardId + " была успешно удалена!");
@@ -88,6 +92,7 @@ public class CardController {
      */
     @PatchMapping("/block-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> blockCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId) {
         cardService.blockCard(cardId);
         return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
@@ -102,6 +107,7 @@ public class CardController {
      */
     @PatchMapping("/activate-card/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> activateCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId) {
         cardService.activateCard(cardId);
         return ResponseEntity.ok("Карта с ID " + cardId + " активирована!");
@@ -119,6 +125,7 @@ public class CardController {
      */
     @GetMapping("/get-cards")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<CardResponse>> getAllCards(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "userId", required = false)
@@ -145,6 +152,7 @@ public class CardController {
      */
     @GetMapping("/get-my-cards")
     @PreAuthorize("hasRole('USER')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<CardResponse>> getAllMyCards(
             @RequestParam(value = "status", required = false) String status,
             @RequestParam(value = "page", defaultValue = "1")
@@ -185,6 +193,7 @@ public class CardController {
      */
     @PatchMapping("/block-my-card/{cardId}")
     @PreAuthorize("hasRole('USER')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> blockMyCard(@PathVariable("cardId") @NotNull @Min(1) Long cardId) {
         cardService.blockMyCard(cardId);
         return ResponseEntity.ok("Карта c ID " + cardId + " заблокирована!");
@@ -200,6 +209,7 @@ public class CardController {
      */
     @PatchMapping("/set-card-limits/{cardId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> setCardLimits(@PathVariable Long cardId,
                                                 @Valid @RequestBody CardLimitRequest request) {
         cardService.setCardLimits(cardId, request);
@@ -216,6 +226,7 @@ public class CardController {
      */
     @PostMapping("/cash-withdraw/{cardId}")
     @PreAuthorize("hasRole('USER')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> cashWithdraw(@PathVariable Long cardId,
                                                @Valid @RequestBody WithdrawRequest request) {
         cardService.cashWithdraw(cardId, request);
@@ -231,6 +242,7 @@ public class CardController {
      */
     @PostMapping("/transfer-between-cards")
     @PreAuthorize("hasRole('USER')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> transferBetweenCards(@Valid @RequestBody TransferRequest request) {
         transferService.transferBetweenCards(request);
         return ResponseEntity.ok("Успешный перевод между картами!");

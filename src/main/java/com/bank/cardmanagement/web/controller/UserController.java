@@ -2,6 +2,8 @@ package com.bank.cardmanagement.web.controller;
 
 import com.bank.cardmanagement.domain.service.UserService;
 import com.bank.cardmanagement.dto.request.UserRequest;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotNull;
@@ -38,6 +40,7 @@ public class UserController {
      */
     @PostMapping("/create-user")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> createUser(@Valid @RequestBody UserRequest userRequest) {
         userService.createUser(userRequest);
         return ResponseEntity.ok("Пользователь успешно создан!");
@@ -51,6 +54,7 @@ public class UserController {
      */
     @DeleteMapping("/delete-user/{userId}")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<String> deleteUser(@PathVariable @NotNull @Min(1) Long userId) {
         userService.deleteUser(userId);
         return ResponseEntity.ok("Пользователь успешно удален!");

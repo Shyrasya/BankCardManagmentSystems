@@ -5,10 +5,11 @@ import com.bank.cardmanagement.dto.request.JwtRequest;
 import com.bank.cardmanagement.dto.request.TokenRequest;
 import com.bank.cardmanagement.dto.response.JwtResponse;
 import com.bank.cardmanagement.entity.TokenType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -43,6 +44,7 @@ public class AuthorizationController {
      * @return JWT токен для доступа к системе
      */
     @PostMapping("/login")
+    @Operation(security = @SecurityRequirement(name = ""))
     public ResponseEntity<?> login(@Valid @RequestBody JwtRequest request) {
         JwtResponse response = userService.authorization(request);
         return ResponseEntity.ok(response);
@@ -55,6 +57,7 @@ public class AuthorizationController {
      * @return новый access токен
      */
     @PostMapping("/update-access")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> updateAccessToken(@Valid @RequestBody TokenRequest request) {
         JwtResponse response = userService.updateToken(request.getRefreshToken(), TokenType.ACCESS);
         return ResponseEntity.ok(response);
@@ -67,6 +70,7 @@ public class AuthorizationController {
      * @return новый refresh токен
      */
     @PostMapping("/update-refresh")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> updateRefreshToken(@Valid @RequestBody TokenRequest request) {
         JwtResponse response = userService.updateToken(request.getRefreshToken(), TokenType.REFRESH);
         return ResponseEntity.ok(response);
@@ -79,6 +83,7 @@ public class AuthorizationController {
      * @return сообщение о выходе пользователя
      */
     @PostMapping("/delete-refresh")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<?> deleteRefreshToken() {
         userService.deleteRefreshToken();
         SecurityContextHolder.clearContext();

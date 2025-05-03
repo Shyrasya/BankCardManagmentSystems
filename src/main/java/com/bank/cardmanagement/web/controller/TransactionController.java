@@ -3,6 +3,8 @@ package com.bank.cardmanagement.web.controller;
 import com.bank.cardmanagement.domain.service.TransactionService;
 import com.bank.cardmanagement.dto.response.TransactionResponse;
 import com.bank.cardmanagement.entity.TransactionType;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.constraints.Min;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -52,6 +54,7 @@ public class TransactionController {
      */
     @GetMapping("/get-transactions")
     @PreAuthorize("hasRole('ADMIN')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<TransactionResponse>> getAllTransaction(
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "cardId", required = false)
@@ -74,6 +77,7 @@ public class TransactionController {
      */
     @GetMapping("/get-my-transactions")
     @PreAuthorize("hasRole('USER')")
+    @Operation(security = @SecurityRequirement(name = "bearerAuth"))
     public ResponseEntity<Page<TransactionResponse>> getAllMyTransaction(
             @RequestParam(value = "type", required = false) String type,
             @RequestParam(value = "cardId", required = false)
