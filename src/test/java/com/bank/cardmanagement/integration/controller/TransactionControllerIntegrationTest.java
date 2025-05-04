@@ -112,4 +112,13 @@ public class TransactionControllerIntegrationTest extends AbstractIntegrationTes
                 .andExpect(jsonPath("$.content").isArray())
                 .andExpect(jsonPath("$.content.length()").value(1));
     }
+
+    @Test
+    void getAllMyTransactions_shouldThrowExceptionForWrongTransactionType() throws Exception {
+        mockMvc.perform(get("/card-management/get-my-transactions")
+                        .header("Authorization", "Bearer " + accessUserToken)
+                        .param("type", "WRONG")
+                        .param("cardId", card.getId().toString()))
+                .andExpect(status().isBadRequest());
+    }
 }
